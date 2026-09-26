@@ -1,6 +1,8 @@
 # happy_factorio
 Edits factorio graphics to be happier and more pastel colored
 
+https://github.com/user-attachments/assets/c5e759bb-1926-40ac-b92e-3e45f2ff9709
+
 
 # Instructions
 There are 2 files to download: pastel-factorio.zip and pastel-water_0.1.0.zip
@@ -43,6 +45,8 @@ When the command completes, you should have 2 new directories: data/base/updated
 5) go to your factorio installation and (Optional: rename your graphics folders in the original installation to ORIGINAL_graphics so you have a backup of the originals. Worst case if you just delete them and want to return to the original grahpics you can reinstall factorio) paste in the updated_graphics folders into their respective locations and rename them to just be "graphics". The game should not be aware you've changed anything as you've just replaced the original graphics folders and it has all the same files (with just different colors in the .pngs).
 
 6) launch factorio and enjoy!
+
+7) If you want to play with it more, you can check out the readme within the paste-factorio.zip to see more details, commands, and how to play with the code.
 
 
 # NOTE: I do not plan to expand or maintain this, so will likely not regularly check in on this github repo. This is a one-time sharing as is :) Feel free to fork it or expand on it or do whatever you want!
