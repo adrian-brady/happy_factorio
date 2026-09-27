@@ -1,0 +1,9 @@
+{
+  "name": "pastel-water",
+  "version": "0.1.0",
+  "title": "Pastel Water",
+  "author": "cozyfire",
+  "factorio_version": "2.0",
+  "dependencies": ["base >= 2.0"],
+  "description": "Shifts water toward a bright, pastel cyan. Companion to the Pastel Factorio graphics recolor. Changes only the water tiles' shader colors."
+}

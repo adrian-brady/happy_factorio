@@ -1,0 +1,210 @@
+# Colors and transform settings for every category used in rules.yaml.
+#
+# Tune with:   python3 -m pastel --preview <file> --watch
+# then edit this file and save; the preview re-renders.
+#
+# Lightness (L) runs 0 (black) to 1 (white). Chroma (C) is colorfulness:
+# 0 is gray, ~0.1 is a clear pastel, ~0.25 is vivid. Hue (h) is an angle in
+# degrees on the OKLCH wheel: ~30 red, ~60 orange/brown, ~100 yellow,
+# ~140 green, ~200 cyan, ~260 blue, ~300 purple, ~350 pink.
+
+global:
+  brightness: 1.0     # 0 = vanilla lightness, 1 = as designed, >1 even brighter
+  saturation: 1.0     # scales colorfulness everywhere: <1 softer/more pastel, >1 punchier
+
+colors:
+  grass:            "#A8D57B"   # slightly yellower (previous: "#A0D680"; original: "#A5DC8C")
+  foliage_ground:   "#66D37A"   # grass tufts & bushes: true vivid green (less lime than the grass)
+  dirt:             "#E9BD84"
+  sand:             "#F5E2B0"
+  red_desert:       "#F2B89A"
+  water:            "#7FDDE6"
+  deepwater:        "#4FC3D9"
+  water_green:      "#8FE3C8"
+  deepwater_green:  "#5CCBB0"
+  water_shallow:    "#A6EDE8"
+  water_mud:        "#D8C99A"
+  landfill:         "#DCC9A0"
+  nuclear:          "#C9C2A8"
+  stone_path:       "#E3DCCF"
+  concrete:         "#ECE7DE"
+  refined_concrete: "#F4F1EA"
+  iron:             "#7297C8"
+  copper:           "#F4A67E"
+  coal:             "#6F6A92"
+  stone:            "#DCC79A"
+  uranium:          "#9CF2A6"
+  oil:              "#5E5A7A"
+  shadow:           "#3A3560"
+  moon:             "#4A4A78"
+  dusk:             "#FFD9C2"
+
+categories:
+
+  passthrough: {type: passthrough}
+
+  # ---------------------------------------------------------------- terrain
+  # 'transfer' moves the category's median color (measured over all of its
+  # files) to `target`, and scales the variation around it by `spread`
+  # (1 = keep vanilla variation, <1 flatter, >1 more contrast).
+  # per_file_match (0..1): also measure each main tile sheet on its own and
+  # move it toward the target, so sheets that start cooler/yellower than their
+  # siblings don't stand out. 0 = off.
+  terrain.grass:
+    type: transfer
+    target: $grass
+    spread: {L: 1.15, C: 1.0, h: 0.35}   # original h: 0.5
+    soft_max: 0.88               # roll off highlights instead of clipping to white
+    per_file_match: 0.7          # pull each grass sheet's own average toward the target
+                                 # (0 = one shared adjustment, 1 = all sheets identical on average)
+  terrain.dirt:
+    type: transfer
+    target: $dirt
+    spread: {L: 1.0, C: 1.0, h: 1.0}
+  terrain.sand:                  # sand is already very light, so cap highlights so grains stay cream, not white
+    inherit: terrain.dirt
+    target: $sand
+    spread: {L: 0.85}            # slightly less light/dark spread than dirt (1.0)
+    soft_max: 0.9                # roll off highlights instead of clipping to white
+  terrain.red_desert:  {inherit: terrain.dirt, target: $red_desert}
+  terrain.landfill:    {inherit: terrain.dirt, target: $landfill}
+  terrain.nuclear:     {inherit: terrain.dirt, target: $nuclear}
+  terrain.stone_path:  {inherit: terrain.dirt, target: $stone_path}
+  terrain.concrete:    {inherit: terrain.dirt, target: $concrete, spread: {L: 0.9, C: 0.5, h: 0.3}}
+  terrain.refined_concrete: {inherit: terrain.concrete, target: $refined_concrete}
+  terrain.water:
+    type: transfer
+    target: $water
+    spread: {L: 2.2, C: 1.2, h: 0.6}
+  terrain.deepwater:        {inherit: terrain.water, target: $deepwater}
+  terrain.water_green:      {inherit: terrain.water, target: $water_green}
+  terrain.deepwater_green:  {inherit: terrain.water, target: $deepwater_green}
+  terrain.water_shallow:    {inherit: terrain.water, target: $water_shallow}
+  terrain.water_mud:        {inherit: terrain.water, target: $water_mud}
+  terrain.hazard:
+    type: remap
+    lift: {floor: 0.55, ceil: 1.0, gamma: 0.8}
+    neutral: {chroma_below: 0.04, hue: 290, chroma: 0.03}
+    chroma: {scale: 1.0, max: 0.16}
+
+  # ------------------------------------------------------------------ ores
+  ore.iron:
+    type: transfer
+    strength: 0.5                # halfway between vanilla and the full recolor
+    target: $iron
+    spread: {L: 1.05, C: 0.6, h: 0.25}
+    soft_max: 0.9
+  ore.copper:   {inherit: ore.iron, target: $copper}
+  ore.coal:     {inherit: ore.iron, target: $coal}
+  ore.stone:    {inherit: ore.iron, target: $stone}
+  ore.uranium:  {inherit: ore.iron, target: $uranium}
+  ore.oil:      {inherit: ore.iron, target: $oil}
+
+  # --------------------------------------------------------------- entities
+  # 'remap' settings:
+  #   lift:   L' = floor + (ceil - floor) * L^gamma. Higher floor = brighter darks.
+  #   detail: sigma = blur radius in pixels for the lift; gain > 1 re-adds a
+  #           little extra texture so lifted sprites don't look flat.
+  #           color_blur smooths color (not lightness) over this many pixels,
+  #           so gray grain doesn't become rainbow speckle; cleaner flat color.
+  #   hue_anchors: [from, to] hue pairs; hues in between are interpolated.
+  #   hue_chroma_range: [lo, hi]; the hue remap applies fully to colors less
+  #           colorful than lo and not at all above hi, so bright accent
+  #           colors (belt yellow, inserter blue) keep their hue.
+  #   neutral: grays (chroma below chroma_below) get this hue and chroma.
+  #   shade:  areas that were darker than `below` lean toward this hue,
+  #           so shading reads as cool lavender instead of black.
+  #   chroma: C' = min(C * scale + add, max)
+  #   strength: how much of the recolor to apply. 1 = full, 0.5 = halfway
+  #           between vanilla and full, 0 = vanilla. Works on every
+  #           remap and transfer category, and is inherited.
+  #   outline: within `width` pixels of the sprite's edge, pull lightness back
+  #           toward the original dark contour (strength 0..1), so sprites stay
+  #           crisp against the light ground.
+  entity:
+    type: remap
+    strength: 0.5                # halfway between vanilla (0) and the full recolor (1)
+    lift: {floor: 0.25, ceil: 0.97, gamma: 0.7}
+    detail: {sigma: 2.0, gain: 1.2, color_blur: 1.5}
+    hue_anchors: [[40, 50], [75, 62], [110, 150], [170, 185], [250, 250], [320, 330]]
+    hue_chroma_range: [0.05, 0.11]
+    neutral: {chroma_below: 0.035, hue: 265, chroma: 0.028}
+    shade: {hue: 295, below: 0.30, strength: 0.8, chroma: 0.05}
+    chroma: {scale: 1.5, add: 0.015, max: 0.18}
+    outline: {width: 2.0, strength: 0.6}
+  enemy:
+    inherit: entity
+    lift: {floor: 0.33}
+    neutral: {hue: 330, chroma: 0.03}
+    shade: {hue: 320}
+    chroma: {max: 0.13}
+  technology:
+    inherit: entity
+    lift: {floor: 0.32}
+  icon:
+    inherit: entity
+    detail: {sigma: 0, color_blur: 0}   # icons are small; no blur
+    outline: {width: 1.0}
+  icon.gui:                      # signals, arrows, fluids, achievements: light touch
+    type: remap
+    lift: {floor: 0.12, ceil: 1.0, gamma: 0.95}
+    chroma: {scale: 0.95, max: 0.3}
+  light:                         # additive glow layers: no lift, slightly softer
+    type: remap
+    chroma: {scale: 0.9, max: 0.35}
+  effect:
+    inherit: light
+
+  # ----------------------------------------------------------------- nature
+  foliage:
+    type: remap
+    strength: 0.5
+    lift: {floor: 0.42, ceil: 0.97, gamma: 0.8}
+    detail: {sigma: 1.5, gain: 1.15}
+    hue_anchors: [[60, 95], [100, 128], [140, 145], [180, 170]]
+    shade: {hue: 200, below: 0.25, strength: 0.5, chroma: 0.03}
+    chroma: {scale: 1.25, add: 0.01, max: 0.16}
+  foliage.ground:                # green grass tufts and small bushes on the ground
+    type: transfer               # like terrain: move every tuft to one bright green
+    strength: 0.6                # 60% of the way from vanilla to the new green
+    target: $foliage_ground
+    spread: {L: 0.85, C: 0.8, h: 0.25}  # low hue spread: yellowish patches don't drift back to lime
+    soft_max: 0.8                # cap highlights lower so bright spots stay green, not white
+  foliage.dry:
+    inherit: foliage
+    hue_anchors: [[50, 72], [90, 88], [130, 115]]
+    chroma: {scale: 1.0, max: 0.12}
+  foliage.red:
+    inherit: foliage
+    hue_anchors: [[20, 15], [40, 30], [100, 125]]
+  wood:
+    inherit: foliage
+    hue_anchors: [[50, 58], [90, 75]]
+    shade: {hue: 300}
+    chroma: {scale: 1.1, max: 0.11}
+  rock:
+    type: remap
+    strength: 0.5
+    lift: {floor: 0.45, ceil: 0.97, gamma: 0.8}
+    detail: {sigma: 2.0, gain: 1.2}
+    neutral: {chroma_below: 0.04, hue: 75, chroma: 0.03}
+    shade: {hue: 295, below: 0.35, strength: 0.8, chroma: 0.04}
+    chroma: {scale: 1.0, max: 0.09}
+
+  # ------------------------------------------------------------ special
+  shadow:
+    type: shadow
+    alpha_scale: 0.6             # 1 = vanilla darkness, 0 = no shadows
+    tint: $shadow                # may be ignored by the game (see plan 6.6)
+
+  lut:
+    type: lut
+    # Files not listed here are left unchanged.
+    #   softness: 0..1, how far to pull the grading back toward "no grading"
+    #   moon / moon_strength: lifts the darkest colors toward this color
+    #   tint / tint_strength: color cast over everything
+    files:
+      lut-night.png:  {softness: 0.2, moon: $moon, moon_strength: 0.25}
+      night.png:      {softness: 0.2, moon: $moon, moon_strength: 0.25}
+      lut-dawn.png:   {softness: 0.30, tint: $dusk, tint_strength: 0.25}
+      lut-sunset.png: {softness: 0.30, tint: $dusk, tint_strength: 0.25}

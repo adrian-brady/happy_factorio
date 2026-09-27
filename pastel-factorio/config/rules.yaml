@@ -1,0 +1,126 @@
+# Which category each PNG belongs to.
+#
+# Paths are relative to project_dir/data/, e.g. base/graphics/terrain/grass-1.png
+# Rules are checked top to bottom and the FIRST match wins, so specific rules
+# go above general ones. Patterns: ** = any number of folders, * = anything
+# within one folder name, {a,b} = either a or b. Matching ignores case.
+#
+# Every PNG must match some rule. If one doesn't, the build stops and lists it.
+# Categories are defined in palette.yaml.
+
+# ===== 1. Never recolor: data, not color ====================================
+- {match: "base/graphics/icons/quality-normal.png", category: icon}   # an icon, not a normal map
+- {match: "**/*-normal.png",                   category: passthrough}   # tree normal maps (lighting data)
+- {match: "**/*mask*.png",                     category: passthrough}   # multiplied by player / fluid / enemy tint
+- {match: "**/*tint*.png",                     category: passthrough}   # tintable, tinted, to-tint layers
+- {match: "base/graphics/terrain/effect-maps/**", category: passthrough}
+- {match: "base/graphics/terrain/effects/**",  category: passthrough}
+- {match: "base/graphics/terrain/masks/**",    category: passthrough}
+
+# ===== 2. core: GUI stays vanilla; only the color LUTs change ===============
+- {match: "core/graphics/color_luts/*.png",    category: lut}
+- {match: "core/graphics/**",                  category: passthrough}
+
+# ===== 3. Special blend layers ===============================================
+- {match: "**/*shadow*.png",                   category: shadow}
+- {match: "base/graphics/entity/**/*-light*.png",  category: light}
+- {match: "base/graphics/entity/**/*-lights*.png", category: light}
+- {match: "base/graphics/entity/**/*emission*.png", category: light}
+- {match: "base/graphics/entity/**/*-glow.png",    category: light}
+- {match: "base/graphics/entity/tree/**/*reflection*.png", category: foliage}
+- {match: "base/graphics/entity/{biter,spitter,worm,spawner}/**/*reflection*.png", category: enemy}
+- {match: "**/*reflection*.png",               category: entity}
+
+# ===== 4. Terrain ============================================================
+- {match: "base/graphics/terrain/grass-*.png",        category: terrain.grass}
+- {match: "base/graphics/terrain/dirt-*.png",         category: terrain.dirt}
+- {match: "base/graphics/terrain/dry-dirt.png",       category: terrain.dirt}
+- {match: "base/graphics/terrain/sand-*.png",         category: terrain.sand}
+- {match: "base/graphics/terrain/red-desert-*.png",   category: terrain.red_desert}
+- {match: "base/graphics/terrain/landfill.png",       category: terrain.landfill}
+- {match: "base/graphics/terrain/nuclear-ground.png", category: terrain.nuclear}
+
+- {match: "base/graphics/terrain/water/**",           category: terrain.water}
+- {match: "base/graphics/terrain/water-wube/**",      category: terrain.water}
+- {match: "base/graphics/terrain/water-green/**",     category: terrain.water_green}
+- {match: "base/graphics/terrain/deepwater/**",       category: terrain.deepwater}
+- {match: "base/graphics/terrain/deepwater-green/**", category: terrain.deepwater_green}
+- {match: "base/graphics/terrain/water-shallow/**",   category: terrain.water_shallow}
+- {match: "base/graphics/terrain/water-mud/**",       category: terrain.water_mud}
+
+# Shorelines and edges: each uses the transform of the tile it belongs to.
+- {match: "base/graphics/terrain/water-transitions/water-patch.png", category: terrain.water}
+- {match: "base/graphics/terrain/*-transition*/grass*",        category: terrain.grass}
+- {match: "base/graphics/terrain/*-transition*/dark-dirt*",    category: terrain.dirt}
+- {match: "base/graphics/terrain/*-transition*/dry-dirt*",     category: terrain.dirt}
+- {match: "base/graphics/terrain/*-transition*/dirt*",         category: terrain.dirt}
+- {match: "base/graphics/terrain/*-transition*/sand*",         category: terrain.sand}
+- {match: "base/graphics/terrain/*-transition*/landfill*",     category: terrain.landfill}
+- {match: "base/graphics/terrain/*-transition*/nuclear-ground*", category: terrain.nuclear}
+- {match: "base/graphics/terrain/*-transition*/stone-path*",   category: terrain.stone_path}
+- {match: "base/graphics/terrain/*-transition*/concrete*",     category: terrain.concrete}
+- {match: "base/graphics/terrain/out-of-map-transition/water-shallow*", category: terrain.water_shallow}
+- {match: "base/graphics/terrain/out-of-map-transition/**",    category: passthrough}   # edge of the black void
+- {match: "base/graphics/terrain/out-of-map.png",              category: passthrough}
+
+- {match: "base/graphics/terrain/stone-path/**",               category: terrain.stone_path}
+- {match: "base/graphics/terrain/concrete/refined-*",          category: terrain.refined_concrete}
+- {match: "base/graphics/terrain/concrete/**",                 category: terrain.concrete}
+- {match: "base/graphics/terrain/hazard-concrete-*/**",        category: terrain.hazard}
+- {match: "base/graphics/terrain/cliffs/**",                   category: rock}
+- {match: "base/graphics/terrain/lab-tiles/**",                category: passthrough}   # map editor only
+- {match: "base/graphics/terrain/tutorial-grid/**",            category: passthrough}   # tutorial only
+
+# ===== 5. Resources ==========================================================
+- {match: "base/graphics/entity/iron-ore/**",               category: ore.iron}
+- {match: "base/graphics/particle/iron-ore-particle/**",    category: ore.iron}
+- {match: "base/graphics/entity/copper-ore/**",             category: ore.copper}
+- {match: "base/graphics/particle/copper-ore-particle/**",  category: ore.copper}
+- {match: "base/graphics/entity/coal/**",                   category: ore.coal}
+- {match: "base/graphics/particle/coal-particle/**",        category: ore.coal}
+- {match: "base/graphics/entity/stone/**",                  category: ore.stone}
+- {match: "base/graphics/entity/uranium-ore/**",            category: ore.uranium}
+- {match: "base/graphics/entity/crude-oil/**",              category: ore.oil}
+
+# ===== 6. Nature =============================================================
+- {match: "base/graphics/entity/tree/**/*-leaves.png",      category: foliage}
+- {match: "base/graphics/entity/tree/**",                   category: wood}       # trunk, stump
+- {match: "base/graphics/particle/{leaf,vegetation}-particle/**", category: foliage}
+- {match: "base/graphics/particle/{wooden,branch}-particle/**",   category: wood}
+- {match: "base/graphics/particle/stone-particle/**",       category: rock}
+
+- {match: "base/graphics/decorative/*-mud-decal/**",        category: terrain.dirt}
+- {match: "base/graphics/decorative/sand-decal/**",         category: terrain.sand}
+- {match: "base/graphics/decorative/sand-dune-decal/**",    category: terrain.sand}
+- {match: "base/graphics/decorative/red-desert-decal/**",   category: terrain.red_desert}
+- {match: "base/graphics/decorative/nuclear-ground-patch/**", category: terrain.nuclear}
+- {match: "base/graphics/decorative/lichen-decal/**",       category: foliage.dry}
+- {match: "base/graphics/decorative/shroom-decal/**",       category: foliage.red}
+- {match: "base/graphics/decorative/{enemy,worms}-decal/**", category: enemy}
+- {match: "base/graphics/decorative/muddy-stump/**",        category: wood}
+- {match: "base/graphics/decorative/*rock*/**",             category: rock}
+- {match: "base/graphics/decorative/green-*/**",            category: foliage.ground}   # grass tufts, small bushes
+- {match: "base/graphics/decorative/garballo/**",           category: foliage.ground}
+- {match: "base/graphics/decorative/{brown-*,garballo-mini-dry,white-desert-bush}/**", category: foliage.dry}
+- {match: "base/graphics/decorative/red-*/**",              category: foliage.red}
+
+# ===== 7. Enemies (pastel too) ===============================================
+- {match: "base/graphics/entity/{biter,spitter,worm,spawner}/**", category: enemy}
+- {match: "base/graphics/entity/acid-*/**",                 category: enemy}
+- {match: "base/graphics/particle/{blood,guts-entrails}-particle/**", category: enemy}
+
+# ===== 8. Effects: fire, explosions, lasers. No lift; they're already bright. =
+- {match: "base/graphics/entity/{smoke,smoke-fast,fire-smoke,smoke-construction}/**", category: passthrough}   # tinted at runtime
+- {match: "base/graphics/entity/*explosion*/**",            category: effect}
+- {match: "base/graphics/entity/{fire-flame,flamethrower-fire-stream,sparks,beam,laser,blue-laser,laser-bubble,artillery-cannon-muzzle-flash,bullet,piercing-bullet}/**", category: effect}
+- {match: "base/graphics/particle/{spark,pole-sparks,explosion}-particle/**", category: effect}
+
+# ===== 9. Icons, technology, GUI-side art ====================================
+- {match: "base/graphics/icons/{signal,fluid,arrows,shapes,shortcut-toolbar,parameter,ammo-category,tooltips}/**", category: icon.gui}
+- {match: "base/graphics/icons/**",                         category: icon}
+- {match: "base/graphics/technology/**",                    category: technology}
+- {match: "base/graphics/{achievement,equipment,item-group}/**", category: icon.gui}
+
+# ===== 10. Everything else in the world ======================================
+- {match: "base/graphics/particle/**",                      category: entity}
+- {match: "base/graphics/entity/**",                        category: entity}
